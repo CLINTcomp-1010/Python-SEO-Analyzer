@@ -1,5 +1,12 @@
 from run_through_urls import scrape_details
 from run_through_urls import scrape_faster
+from urllib.parse import urlparse
+
+def safe_get_dict(data, index):
+    try:
+        return data[index] if data[index] else {}
+    except:
+        return {}
 
 
 class get_scrapped_data:
@@ -12,27 +19,26 @@ class get_scrapped_data:
     def duplicate_titles():
         duplicate_title_pages = []
         flipped = {}
-        dict_titles = get_scrapped_data.get_data[0]
-        print(dict_titles)
-        for key, value in dict_titles.items():
-            if value is not None:
-                if value not in flipped:
-                    flipped[value] = [key]
-                else:
-                    flipped[value].append(key)
 
-        for key, value in flipped.items():
-            if len(value) > 1:
-                duplicate_title_pages.append(value)
-            else:
-                pass
+        dict_titles = safe_get_dict(get_scrapped_data.get_data, 0)
+
+        for key, value in dict_titles.items():
+            if not value:
+                continue
+
+            flipped.setdefault(value, []).append(key)
+
+        for value, urls in flipped.items():
+            if len(urls) > 1:
+                duplicate_title_pages.append(urls)
+
         return duplicate_title_pages
 
     @staticmethod
     def duplicate_meta_descriptions():
         duplicate_md_pages = []
         flipped = {}
-        dict_md = get_scrapped_data.get_data[1]
+        dict_md = safe_get_dict(get_scrapped_data.get_data, 1)
         for key, value in dict_md.items():
             if value is not None:
 
@@ -51,7 +57,7 @@ class get_scrapped_data:
     @staticmethod
     def get_missing_descriptions():
         missing_descriptions = []
-        dict_missing = get_scrapped_data.get_data[1]
+        dict_missing = safe_get_dict(get_scrapped_data.get_data, 1)
         for key, value in dict_missing.items():
             if value is None:
                 missing_descriptions.append(key)
@@ -84,72 +90,86 @@ class get_scrapped_data:
 
     @staticmethod
     def get_missing_titles():
-        missing_titles = []
-        dict_missing = get_scrapped_data.get_data[0]
-        for key, value in dict_missing.items():
-            if value is None:
-                missing_titles.append(key)
-            else:
-                pass
+        missing = []
+        dict_titles = safe_get_dict(get_scrapped_data.get_data, 0)
 
-        return missing_titles
+        for key, value in dict_titles.items():
+            if not value:
+                missing.append(key)
+
+        return missing
+    
+
     @staticmethod
     def get_missing_h1():
-        missing_h1 = []
-        dict_missing = get_scrapped_data.get_data[2]
-        print(dict_missing)
-        for key, value in dict_missing.items():
-            if len(value) == 0:
-                missing_h1.append(key)
-        return missing_h1
+        missing = []
+        dict_h1 = safe_get_dict(get_scrapped_data.get_data, 2)
+
+        for key, value in dict_h1.items():
+            if not value:
+                missing.append(key)
+
+        return missing
 
     @staticmethod
     def get_duplicate_h1():
-        duplicate_h1 = []
+        duplicate = []
         flipped = {}
-        dict_h1 = get_scrapped_data.get_data[2]
-        for key, value in dict_h1.items():
-            if len(value) !=0:
-                for item in value:
-                    if item not in flipped:
-                        flipped[item] = [key]
-                    else:
-                        flipped[item].append(key)
 
-        for key, value in flipped.items():
-            if len(value) > 1:
-                duplicate_h1.append(value)
-            else:
-                pass
-        print(duplicate_h1)
-        return duplicate_h1
+        dict_h1 = safe_get_dict(get_scrapped_data.get_data, 2)
+
+        for key, value in dict_h1.items():
+            if not value:
+                continue
+
+            for item in value:
+                flipped.setdefault(item, []).append(key)
+
+        for item, urls in flipped.items():
+            if len(urls) > 1:
+                duplicate.append(urls)
+
+        return duplicate
 
     @staticmethod
     def get_missing_canonicals():
-        missing_canonicals = []
-        dict_canonicals = get_scrapped_data.get_data[3]
+        missing = []
+        dict_canonicals = safe_get_dict(get_scrapped_data.get_data, 3)
+
         for key, value in dict_canonicals.items():
-            if value is None:
-                missing_canonicals.append(key)
-        return  missing_canonicals
+            if not value:
+                missing.append(key)
+
+        return missing
 
     @staticmethod
     def improper_canonicals():
         improper = []
-        dict_canonicals = get_scrapped_data.get_data[3]
-        for key, value in dict_canonicals.items():
-            if value is not None:
-                if value != key:
-                    improper.append(key)
+        dict_canonicals = safe_get_dict(get_scrapped_data.get_data, 3)
+
+        for page_url, canonical in dict_canonicals.items():
+            if not canonical:
+                continue
+
+            try:
+                base_page = urlparse(page_url).netloc
+                base_canonical = urlparse(canonical).netloc
+
+                if base_page != base_canonical:
+                    improper.append(page_url)
+            except:
+                continue
+
         return improper
 
     @staticmethod
     def missing_viewports():
-        missing_viewports = []
-        dict_missing_v = get_scrapped_data.get_data[4]
-        for key, value in dict_missing_v.items():
-            if value is False:
-                missing_viewports.append(key)
+        missing = []
+        dict_view = safe_get_dict(get_scrapped_data.get_data, 4)
 
-        return missing_viewports
+        for key, value in dict_view.items():
+            if value is not True:
+                missing.append(key)
+
+        return missing
 

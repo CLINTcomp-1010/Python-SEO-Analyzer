@@ -3,19 +3,31 @@ from multiprocessing.dummy import Pool
 
 
 def scrape_details(line):
-    print("Scraping " + line + "\n")
-    page = scrape(line.strip())
-    title = page.get_title()
-    print(line + " " + str(title))
-    dict_titles.update({line: title})
-    meta_descriptions = page.get_meta_description()
-    dict_meta_d.update({line: meta_descriptions})
-    h1_text = page.get_h1_tags()
-    h1_tags.update(({line:h1_text}))
-    canonical = page.get_canonical()
-    canonicals.update({line:canonical})
-    viewport_present = page.get_viewports()
-    viewports.update({line:viewport_present})
+    try:
+        print("Scraping " + line + "\n")
+        page = scrape(line.strip())
+        print("SUCCESS:", line, page.page is not None)
+
+        if not page.page:
+            return
+
+        title = page.get_title()
+        dict_titles.update({line: title})
+
+        meta_descriptions = page.get_meta_description()
+        dict_meta_d.update({line: meta_descriptions})
+
+        h1_text = page.get_h1_tags()
+        h1_tags.update({line: h1_text})
+
+        canonical = page.get_canonical()
+        canonicals.update({line: canonical})
+
+        viewport_present = page.get_viewports()
+        viewports.update({line: viewport_present})
+
+    except Exception as e:
+        print(f"Failed scraping {line}: {e}")
 
 
 def scrape_faster(filename):

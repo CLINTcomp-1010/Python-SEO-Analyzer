@@ -5,57 +5,49 @@ import requests
 class scrape:
 
     def __init__(self, url):
-        scrape.url = url
-        scrape.response = requests.get(scrape.url, allow_redirects=False)
-        scrape.page = BeautifulSoup(scrape.response.text, 'html.parser')
+        self.url = url
+        self.page = None
+        self.response = None
 
-    @staticmethod
-    def get_title():
-        text = scrape.page
         try:
-            title = text.find('title')
-            return str(title.string)
-        except:
+            self.response = requests.get(
+                self.url,
+                allow_redirects=False,
+                timeout=10,
+                headers={"User-Agent": "Mozilla/5.0"}
+            )
+
+            if self.response.status_code == 200:
+                self.page = BeautifulSoup(self.response.text, 'html.parser')
+
+        except requests.exceptions.RequestException as e:
+            print(f"[SCRAPER ERROR] {self.url} -> {e}")
+
+    def get_title(self):
+        if not self.page:
+            return None
+        tag = self.page.find('title')
+        return tag.string.strip() if tag and tag.string else None
+
+    def get_meta_description(self):
+        if not self.page:
             return None
 
+        tag = self.page.find("meta", attrs={"name": "description"})
+        return tag.get("content") if tag else None
 
-    @staticmethod
-    def get_meta_description():
-        text = scrape.page
-        for tag in text.find_all('meta'):
-            if tag.get('name', None) == 'description':
-                return tag.get('content', None)
+    def get_h1_tags(self):
+        if not self.page:
+            return []
+        return [h.text.strip() for h in self.page.find_all("h1")]
 
-    @staticmethod
-    def get_h1_tags():
-        text = scrape.page
-        h1 = text.find_all('h1')
-        h1s = [item.text for item in h1]
-        return h1s
-
-    @staticmethod
-    def get_canonical():
-        text = scrape.page
-        can = text.find('link', rel='canonical')
-        try:
-            return can['href']
-        except:
+    def get_canonical(self):
+        if not self.page:
             return None
+        tag = self.page.find("link", rel="canonical")
+        return tag.get("href") if tag else None
 
-    @staticmethod
-    def get_viewports():
-        text = scrape.page
-        for tag in text.find_all(attrs={"name":"viewport"}):
-            if tag.get('name') == 'viewport':
-                return True
-            else:
-                return False
-
-
-
-
-
-
-
-
-
+    def get_viewports(self):
+        if not self.page:
+            return False
+        return self.page.find("meta", attrs={"name": "viewport"}) is not None

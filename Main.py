@@ -18,26 +18,44 @@ HOMEPAGE = input("Homepage?: ")
 DOMAIN_NAME = get_domain_name(HOMEPAGE)
 spider.Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
+def normalize_result(result):
+    if not result:
+        return []
+
+    if isinstance(result, dict):
+        return list(result.items())
+
+    if isinstance(result, list):
+        # flatten nested lists safely
+        flat = []
+        for item in result:
+            if isinstance(item, list):
+                flat.extend(item)
+            else:
+                flat.append(item)
+        return flat
+
+    return [result]
+
 def load_and_write_workbook(workbook_name, name_of_audit_sheet, result):
     Newbook = load_workbook(workbook_name + ".xlsx")
     Newbook.create_sheet(name_of_audit_sheet)
     worksheet = Newbook[name_of_audit_sheet]
-    if any(isinstance(el, list) for el in result):
-        result_in = [item for sublist in result for item in sublist]
-    else:
-        result_in = result
-    m = len(result_in)
-    for i in range(1, m + 1):
-        worksheet.cell(row=i, column=1, value=(result_in[i - 1]))
+
+    result_in = normalize_result(result)
+
+    for i in range(1, len(result_in) + 1):
+        worksheet.cell(row=i, column=1, value=result_in[i - 1])
+
     Newbook.save(filename=PROJECT_NAME + '.xlsx')
  
 create_workers()
 crawl(PROJECT_NAME + '/queue.txt')
 
-time.sleep(6)
+# time.sleep(6)
 print("Auditing")
 
-scrapped_data = get_scrapped_data(PROJECT_NAME + '\crawled.txt')
+scrapped_data = get_scrapped_data(os.path.join(PROJECT_NAME, "crawled.txt"))
 duplicate_titles = scrapped_data.duplicate_titles()
 duplicate_descriptions = scrapped_data.duplicate_meta_descriptions()
 missing_descriptions = scrapped_data.get_missing_descriptions()
@@ -50,7 +68,17 @@ missing_viewports = scrapped_data.missing_viewports()
 low_titles = scrapped_data.get_titles_with_less_content()
 low_meta = scrapped_data.get_meta_des_with_less_content()
 
-
+print("Duplicate Titles:", duplicate_titles)
+print("Duplicate Meta:", duplicate_descriptions)
+print("Missing Descriptions:", missing_descriptions)
+print("Missing Titles:", missing_titles)
+print("Missing H1:", missing_h1)
+print("Duplicate H1:", duplicate_h1)
+print("Missing Canonicals:", missing_canonicals)
+print("Improper Canonicals:", wrong_canonicals)
+print("Missing Viewports:", missing_viewports)
+print("Thin Titles:", low_titles)
+print("Thin Meta:", low_meta)
 print("Preparing Results")
 
 create_workbook(PROJECT_NAME)
