@@ -1,0 +1,18 @@
+# Virtual environments
+.venv/
+env/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# Excel reports
+*.xlsx
+~$*.xlsx
+
+# Generated audit folders
+Oryna Audit/
+
+# IDE
+.idea/
+.vscode/
