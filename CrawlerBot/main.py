@@ -4,20 +4,8 @@ from CrawlerBot.spider import Spider
 from CrawlerBot.domain import *
 from CrawlerBot.general import *
 
-
-
-PROJECT_NAME = input('Project name?: ')
-
-
-HOMEPAGE = input('homepage?: ')
-
-DOMAIN_NAME = get_domain_name(HOMEPAGE)
-QUEUE_FILE = PROJECT_NAME + '/queue.txt'
-CRAWLED_FILE = PROJECT_NAME + '/crawled.txt'
 NUMBER_OF_THREADS = 8
 queue = Queue()
-Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
-
 
 # Create worker threads (will die when main exits)
 def create_workers():
@@ -36,20 +24,16 @@ def work():
 
 
 # Each queued link is a new job
-def create_jobs():
-    for link in file_to_set(QUEUE_FILE):
+def create_jobs(queue_file):
+    for link in file_to_set(queue_file):
         queue.put(link)
     queue.join()
-    crawl()
+    crawl(queue_file)
 
 
 # Check if there are items in the queue, if so crawl them
-def crawl():
-    queued_links = file_to_set(QUEUE_FILE)
+def crawl(queue_file):
+    queued_links = file_to_set(queue_file)
     if len(queued_links) > 0:
         print(str(len(queued_links)) + ' links in the queue')
-        create_jobs()
-
-
-create_workers()
-crawl()
+        create_jobs(queue_file)

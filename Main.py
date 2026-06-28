@@ -3,7 +3,6 @@ import threading
 from queue import Queue
 from CrawlerBot.main import create_workers
 from CrawlerBot.main import crawl
-from CrawlerBot.main import *
 from CrawlerBot.domain import *
 from CrawlerBot.general import *
 from CrawlerBot.linkfinder import *
@@ -12,7 +11,12 @@ from general2 import *
 from Scrap_Webpage import scrape
 from multiprocessing import Pool
 import time
+import os
 
+PROJECT_NAME = input("Project name?: ")
+HOMEPAGE = input("Homepage?: ")
+DOMAIN_NAME = get_domain_name(HOMEPAGE)
+spider.Spider(PROJECT_NAME, HOMEPAGE, DOMAIN_NAME)
 
 def load_and_write_workbook(workbook_name, name_of_audit_sheet, result):
     Newbook = load_workbook(workbook_name + ".xlsx")
@@ -26,10 +30,9 @@ def load_and_write_workbook(workbook_name, name_of_audit_sheet, result):
     for i in range(1, m + 1):
         worksheet.cell(row=i, column=1, value=(result_in[i - 1]))
     Newbook.save(filename=PROJECT_NAME + '.xlsx')
-
-
+ 
 create_workers()
-crawl()
+crawl(PROJECT_NAME + '/queue.txt')
 
 time.sleep(6)
 print("Auditing")
