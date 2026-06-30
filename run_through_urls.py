@@ -64,4 +64,4 @@ def get_urls_from_file(filename):
         list_of_url.remove('')
         clean_url_list = [url for url in list_of_url if (
                     'jpeg' in url or '#' in url or 'pdf' in url or 'png' in url or 'jpg' in url or 'tag' in url or 'tel' in url) == False]
-        return clean_url_list
+        return clean_url_list 
