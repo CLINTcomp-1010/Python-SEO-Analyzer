@@ -94,3 +94,4 @@ class Spider:
         set_to_file(Spider.crawled, Spider.crawled_file)
 
 
+
