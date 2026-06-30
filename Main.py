@@ -88,4 +88,4 @@ load_and_write_workbook(PROJECT_NAME, 'DuplicateMetaDescriptions', duplicate_des
 load_and_write_workbook(PROJECT_NAME, 'missingDescriptions', missing_descriptions)
 load_and_write_workbook(PROJECT_NAME, 'Thin Meta', low_meta)
 load_and_write_workbook(PROJECT_NAME, 'thin titles', low_titles)
-load_and_write_workbook(PROJECT_NAME, 'Missing Viewports', missing_viewports)
+load_and_write_workbook(PROJECT_NAME, 'Missing Viewports', missing_viewports) 
