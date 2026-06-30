@@ -19,7 +19,8 @@ class Spider:
 
     def __init__(self, project_name, base_url, domain_name):
         Spider.project_name = project_name
-        Spider.base_url = base_url
+        Spider.base_url = normalize_url(base_url)
+        Spider.base_url = Spider.base_url.rstrip("/")
         Spider.domain_name = domain_name
         Spider.queue_file = Spider.project_name + '/queue.txt'
         Spider.crawled_file = Spider.project_name + '/crawled.txt'
@@ -37,6 +38,7 @@ class Spider:
     # Updates user display, fills queue and updates files
     @staticmethod
     def crawl_page(thread_name, page_url):
+        page_url = normalize_url(page_url)
         if page_url not in Spider.crawled:
             print(thread_name + ' now crawling ' + page_url)
             print('Queue ' + str(len(Spider.queue)) + ' | Crawled  ' + str(len(Spider.crawled)))
@@ -68,12 +70,23 @@ class Spider:
     @staticmethod
     def add_links_to_queue(links):
         for url in links:
-            if (url in Spider.queue) or (url in Spider.crawled):
+
+            url = normalize_url(url)
+
+            if url == Spider.base_url:
                 continue
-            if Spider.domain_name != get_domain_name(url):
+
+            if url in Spider.queue or url in Spider.crawled:
+                continue
+
+            base_host = get_sub_domain_name(Spider.base_url).lower()
+
+            if get_sub_domain_name(url).lower() != base_host:
                 continue
 
             Spider.queue.add(url)
+
+        Spider.update_files()
 
     @staticmethod
     def update_files():

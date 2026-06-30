@@ -1,4 +1,5 @@
 import os
+from urllib.parse import urlsplit, urlunsplit
 
 
 # Each website is a separate project (folder)
@@ -49,3 +50,21 @@ def set_to_file(links, file_name):
     with open(file_name,"w") as f:
         for l in sorted(links):
             f.write(l+"\n")
+
+
+def normalize_url(url):
+    parts = urlsplit(url)
+
+    # Remove fragment (#section)
+    fragment = ""
+
+    # Remove trailing slash except for root
+    path = parts.path.rstrip("/")
+
+    return urlunsplit((
+        parts.scheme,
+        parts.netloc,
+        path,
+        parts.query,
+        fragment
+    ))
