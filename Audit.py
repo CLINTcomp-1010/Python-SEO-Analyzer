@@ -172,4 +172,5 @@ class get_scrapped_data:
                 missing.append(key)
 
         return missing
+    
 
